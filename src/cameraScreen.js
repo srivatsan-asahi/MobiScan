@@ -2,7 +2,7 @@
 // https://aboutreact.com/react-native-camera/
 
 // import React in our code
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // import all the components we are going to use
 import {
@@ -22,12 +22,13 @@ import {
 import { connect } from 'react-redux';
 import ImagePicker from 'react-native-image-crop-picker';
 
+import { Emboss, Grayscale } from 'react-native-image-filter-kit';
+import { CAPTUREDIMAGE } from './redux/action';
 
 const CameraScreen = (props) => {
+
     const { capturedImageUri } = props
-
-
-
+    const [nativeUri, setnativeUri] = useState('')
     function cropLast() {
         if (!capturedImageUri.uri) {
             return Alert.alert(
@@ -37,7 +38,7 @@ const CameraScreen = (props) => {
         }
 
         ImagePicker.openCropper({
-            path: capturedImageUri.uri,
+            path: nativeUri,
             width: 200,
             height: 200,
         })
@@ -53,17 +54,32 @@ const CameraScreen = (props) => {
     return (
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
 
-            <Image
-                style={{ width: '80%', height: '80%' }}
-                source={{ uri: capturedImageUri.uri }}
+            <Grayscale
+                style={{ width: '50%', height: '50%', justifyContent: 'center', alignItems: 'center' }}
+                extractImageEnabled={true}
+                onExtractImage={({ nativeEvent }) => {
+                    setnativeUri(nativeEvent.uri)
+                }
+                }
+                image={
+                    <Image
+                        style={{ width: '80%', height: '80%' }}
+                        source={{ uri: capturedImageUri.uri }}
+                        resizeMode={'contain'}
+                    />
+                }
             />
 
-            <Pressable onPress={cropLast}>
-                <Text style={{ fontSize: 10, color: "black" }}>crop</Text>
-            </Pressable>
-            <Pressable onPress={() => console.log('filterScreen')}>
-                <Text>Grey</Text>
-            </Pressable>
+            <View>
+                <Pressable onPress={cropLast}>
+                    <Text style={{ fontSize: 10, color: "black" }}>crop</Text>
+                </Pressable>
+                <Pressable onPress={() => console.log('filterScreen')}>
+                    <Text>Grey</Text>
+                </Pressable>
+            </View>
+
+
         </View>
     )
 };
@@ -74,9 +90,14 @@ const mapStateToProps = state => {
     }
 
 };
+const mapDispatchToProps = dispatch => {
 
+    return {
+        setImage: (uri) => dispatch({ type: CAPTUREDIMAGE, payload: uri }),
+    }
+}
 
-export default connect(mapStateToProps, undefined)(CameraScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(CameraScreen);
 
 const styles = StyleSheet.create({
     container: {

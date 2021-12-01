@@ -18,6 +18,8 @@ target 'MobiScan' do
 
   pod 'RNColorMatrixImageFilters', :path => '../node_modules/react-native-color-matrix-image-filters'
 
+  pod 'react-native-image-filter-kit', :path => '../node_modules/react-native-image-filter-kit'
+
   target 'MobiScanTests' do
     inherit! :complete
     # Pods for testing
