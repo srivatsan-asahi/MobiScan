@@ -24,62 +24,30 @@ import ImagePicker from 'react-native-image-crop-picker';
 
 import { Emboss, Grayscale } from 'react-native-image-filter-kit';
 import { CAPTUREDIMAGE } from './redux/action';
+import { CropIcon, ImageEdit } from '../assets/icons';
 
-const CameraScreen = (props) => {
-
-    const { capturedImageUri } = props
-    const [nativeUri, setnativeUri] = useState('')
-    function cropLast() {
-        if (!capturedImageUri.uri) {
-            return Alert.alert(
-                'No image',
-                'Before open cropping only, please select image'
-            );
-        }
-
-        ImagePicker.openCropper({
-            path: nativeUri,
-            width: 200,
-            height: 200,
-        })
-            .then((image) => {
-                console.log('received cropped image', image);
-            })
-            .catch((e) => {
-                console.log(e);
-            });
-    }
-
-
+const FilterScreen = (props) => {
+    const { capturedImageUri, route } = props;
+    let uri = route.params.value.uri;
     return (
-        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
 
             <Grayscale
-                style={{ width: '50%', height: '50%', justifyContent: 'center', alignItems: 'center' }}
+                style={{ width: '90%', height: '90%', justifyContent: 'center', alignItems: 'center' }}
                 extractImageEnabled={true}
                 onExtractImage={({ nativeEvent }) => {
-                    setnativeUri(nativeEvent.uri)
+                    // setnativeUri(nativeEvent.uri)
+                    console.log(nativeEvent)
                 }
                 }
                 image={
                     <Image
-                        style={{ width: '80%', height: '80%' }}
-                        source={{ uri: capturedImageUri.uri }}
+                        style={{ width: '100%', height: '100%' }}
+                        source={{ uri: uri }}
                         resizeMode={'contain'}
                     />
                 }
             />
-
-            <View>
-                <Pressable onPress={cropLast}>
-                    <Text style={{ fontSize: 10, color: "black" }}>crop</Text>
-                </Pressable>
-                <Pressable onPress={() => console.log('filterScreen')}>
-                    <Text>Grey</Text>
-                </Pressable>
-            </View>
-
-
         </View>
     )
 };
@@ -97,7 +65,7 @@ const mapDispatchToProps = dispatch => {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(CameraScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(FilterScreen);
 
 const styles = StyleSheet.create({
     container: {

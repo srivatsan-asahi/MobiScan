@@ -18,11 +18,13 @@ import {
   View,
 } from 'react-native';
 import { Provider } from 'react-redux'
-import HomeScreen from './src/homeScree';
+import HomeScreen from './src/homeScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { store } from './src/redux/store';
-import CameraScreen from './src/cameraScreen';
+
+import filterScreen from './src/filterScreen';
+
 
 
 
@@ -36,7 +38,7 @@ const App = () => {
       <NavigationContainer>
         <Stack.Navigator>
           <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="CameraEditing" component={CameraScreen} />
+          <Stack.Screen name="FilterScreen" component={filterScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </Provider>

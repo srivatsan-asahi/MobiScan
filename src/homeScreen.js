@@ -5,13 +5,15 @@ import {
 } from 'react-native';
 import { CameraIcon, GalleryIcon } from '../assets/icons';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import { CAPTUREDIMAGE } from "../src/redux/action/index";
+import { CAPTUREDIMAGE } from "./redux/action/index";
 import { connect } from 'react-redux';
-
+import ImagePicker from 'react-native-image-crop-picker';
 
 const HomeScreen = (props) => {
     const { navigation } = props
+    //  Ask Permission
     const requestCameraPermission = async () => {
+
         try {
             const granted = await PermissionsAndroid.request(
                 PermissionsAndroid.PERMISSIONS.CAMERA,
@@ -23,15 +25,17 @@ const HomeScreen = (props) => {
                     buttonPositive: "OK"
                 }
             );
-            if (granted === PermissionsAndroid.RESULTS.GRANTED) return
+            console.log(granted)
+            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                return console.log("hello")
+            }
         } catch (err) {
             console.warn(err);
         }
+
     };
 
-    const navigateEditing = () => {
-        navigation.navigate('CameraEditing')
-    }
+    // Take the Picture
 
     const openCamera = () => {
         const options = {
@@ -51,8 +55,7 @@ const HomeScreen = (props) => {
             } else {
                 const imageObj = response.assets[0];
                 props.setImage(imageObj)
-                navigateEditing();
-                // await setImageView({ imageView: true, imageClicked: imageObj, orderID: orderID });
+                cropLast(imageObj)
             }
         })
     };
@@ -75,7 +78,7 @@ const HomeScreen = (props) => {
             } else {
                 const imageObj = response.assets[0];
                 props.setImage(imageObj)
-                navigateEditing()
+                cropLast(imageObj)
                 // await setImageView({ imageView: true, imageClicked: imageObj, orderID: orderID });
             }
         })
@@ -85,15 +88,45 @@ const HomeScreen = (props) => {
 
 
     const onPressCamera = () => {
-        console.log("pressed camera")
         requestCameraPermission()
         openCamera();
 
     }
     const onPressGallery = () => {
-        console.log("Pressed Gallery")
         openImageGallery();
     }
+
+
+    //  Crop the Data
+
+    const navigateFilter = (image) => {
+        navigation.navigate('FilterScreen', { value: image })
+    }
+
+
+    function cropLast(data) {
+        if (!data) {
+            return Alert.alert(
+                'No image',
+                'Before open cropping only, please select image'
+            );
+        }
+        ImagePicker.openCropper({
+            path: data.uri,
+            width: 400,
+            height: 400,
+            freeStyleCropEnabled: true
+        }).then((image) => {
+            image['uri'] = image['path'];
+            props.setImage(image);
+            navigateFilter(image)
+
+        }).catch((e) => {
+            console.log(e);
+        });
+
+    };
+
 
     return (
         <View style={styles.container}>
@@ -133,8 +166,6 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         alignItems: 'center',
     },
-
-
 
 });
 const mapStateToProps = state => {
