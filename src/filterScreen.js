@@ -2,7 +2,7 @@
 // https://aboutreact.com/react-native-camera/
 
 // import React in our code
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 // import all the components we are going to use
 import {
@@ -13,7 +13,7 @@ import {
     TouchableOpacity,
     Image,
     PermissionsAndroid,
-    Alert,
+    FlatList,
     Platform,
     TouchableHighlight,
     Pressable,
@@ -25,32 +25,74 @@ import ImagePicker from 'react-native-image-crop-picker';
 import { CAPTUREDIMAGE } from './redux/action';
 import { CropIcon, ImageEdit } from '../assets/icons';
 import {
-    Grayscale,
-    Sepia,
-    Tint,
     ColorMatrix,
-    concatColorMatrices,
-    invert,
-    contrast,
-    saturate,
+    concatColorMatrices
 } from 'react-native-color-matrix-image-filters';
+import { negativefilter, normalfilter, greyScale } from '../assets/filters';
+
 
 
 
 const FilterScreen = (props) => {
     const { capturedImageUri, route } = props;
 
+    const [filterType, setfiltertype] = useState(normalfilter)
+
     let uri = route.params.value.uri;
+
+    let filterdata = [
+        {
+            id: 1,
+            filterOption: normalfilter,
+            filterName: 'Normal',
+            hexCode: '#808080'
+        }
+        ,
+        {
+            id: 2,
+            filterOption: negativefilter,
+            filterName: 'Negative',
+            hexCode: '#808080'
+        }
+        ,
+        {
+            id: 3,
+            filterOption: greyScale,
+            filterName: 'GreyScale',
+            hexCode: '#808080'
+        }
+    ];
+
+    const renderItem = useCallback(({ item }) => {
+        return (
+
+            <Pressable onPress={() => {
+
+                setfiltertype(item.filterOption)
+            }}>
+                <View style={[styles.filterlistView, { backgroundColor: item.hexCode }]} >
+                    <Text>{item.filterName}</Text>
+                </View>
+            </Pressable>
+
+        );
+    }, []);
+
+    const keyExtractor = useCallback((item) => {
+        return item.id;
+    }, []);
+
 
 
 
     return (
-        <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
-
+        <View style={styles.container}>
+            <Pressable>
+                <Text>Share</Text>
+            </Pressable>
             <ColorMatrix
                 style={{ width: '90%', height: '90%', justifyContent: 'center', alignItems: 'center' }}
-                matrix={concatColorMatrices([saturate(1), contrast(1), invert(1)])}
-            // alt: matrix={[saturate(-0.9), contrast(5.2), invert()]}
+                matrix={concatColorMatrices([filterType])}
             >
 
                 <Image
@@ -60,6 +102,13 @@ const FilterScreen = (props) => {
                 />
 
             </ColorMatrix>
+            <FlatList
+                data={filterdata}
+                renderItem={renderItem}
+                keyExtractor={keyExtractor}
+                horizontal={true}
+            />
+
         </View>
     )
 };
@@ -81,34 +130,15 @@ export default connect(mapStateToProps, mapDispatchToProps)(FilterScreen);
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: 'white',
-        padding: 10,
+        justifyContent: 'center',
         alignItems: 'center',
+        flex: 1
     },
-    titleText: {
-        fontSize: 22,
-        textAlign: 'center',
-        fontWeight: 'bold',
-    },
-    textStyle: {
-        color: 'black',
-        fontSize: 16,
-        textAlign: 'center',
-        padding: 10,
-        marginTop: 16,
-    },
-    buttonStyle: {
-        fontSize: 16,
-        color: 'white',
-        backgroundColor: 'green',
-        padding: 5,
-        marginTop: 32,
-        minWidth: 250,
-    },
-    buttonTextStyle: {
-        padding: 5,
-        color: 'white',
-        textAlign: 'center',
-    },
+    filterlistView: {
+        justifyContent: 'space-around',
+        margin: 10,
+        width: 20,
+        height: 20,
+    }
+
 });
