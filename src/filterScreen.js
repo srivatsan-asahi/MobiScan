@@ -22,32 +22,44 @@ import {
 import { connect } from 'react-redux';
 import ImagePicker from 'react-native-image-crop-picker';
 
-import { Emboss, Grayscale } from 'react-native-image-filter-kit';
 import { CAPTUREDIMAGE } from './redux/action';
 import { CropIcon, ImageEdit } from '../assets/icons';
+import {
+    Grayscale,
+    Sepia,
+    Tint,
+    ColorMatrix,
+    concatColorMatrices,
+    invert,
+    contrast,
+    saturate,
+} from 'react-native-color-matrix-image-filters';
+
+
 
 const FilterScreen = (props) => {
     const { capturedImageUri, route } = props;
+
     let uri = route.params.value.uri;
+
+
+
     return (
         <View style={{ justifyContent: 'center', alignItems: 'center', flex: 1 }}>
 
-            <Grayscale
+            <ColorMatrix
                 style={{ width: '90%', height: '90%', justifyContent: 'center', alignItems: 'center' }}
-                extractImageEnabled={true}
-                onExtractImage={({ nativeEvent }) => {
-                    // setnativeUri(nativeEvent.uri)
-                    console.log(nativeEvent)
-                }
-                }
-                image={
-                    <Image
-                        style={{ width: '100%', height: '100%' }}
-                        source={{ uri: uri }}
-                        resizeMode={'contain'}
-                    />
-                }
-            />
+                matrix={concatColorMatrices([saturate(1), contrast(1), invert(1)])}
+            // alt: matrix={[saturate(-0.9), contrast(5.2), invert()]}
+            >
+
+                <Image
+                    style={{ width: '100%', height: '100%' }}
+                    source={{ uri: uri }}
+                    resizeMode={'contain'}
+                />
+
+            </ColorMatrix>
         </View>
     )
 };
