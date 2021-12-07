@@ -23,7 +23,7 @@ import filters from '../assets/filters';
 // Image Converting and Sharing  Packages
 
 import { BackArrowIcon, CloseIcon, SaveIcon, ShareIcon } from '../assets/icons';
-
+import CameraRoll from '@react-native-community/cameraroll'
 
 const FilterScreen = (props) => {
 
@@ -32,6 +32,7 @@ const FilterScreen = (props) => {
     const [modalVisible, setModalVisible] = useState(false);
 
     // URI 
+    console.log(route.params.value.uri)
     let uri = useRef(route.params.value.uri);
     // let pdfuri = uri.current.split('file://').pop().toString()
 
@@ -57,6 +58,7 @@ const FilterScreen = (props) => {
     };
 
     const onExtractImage = ({ nativeEvent }) => {
+        console.log(nativeEvent.uri)
         uri.current = nativeEvent.uri;
     };
 

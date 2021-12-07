@@ -1,16 +1,32 @@
-import React, { Component, useRef } from 'react';
+import React, { Component, useEffect, useRef, useState } from 'react';
 import {
     Text, View, Pressable, StyleSheet, PermissionsAndroid,
-    Alert,
+    Alert, FlatList, ScrollView, Image
 } from 'react-native';
 import { CameraIcon, GalleryIcon } from '../assets/icons';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { CAPTUREDIMAGE } from "./redux/action/index";
 import { connect } from 'react-redux';
 import ImagePicker from 'react-native-image-crop-picker';
+import RNFetchBlob from 'react-native-fetch-blob'
+import { useIsFocused } from '@react-navigation/native';
 
 const HomeScreen = (props) => {
-    const { navigation } = props
+
+    const { navigation } = props;
+    const [imageList, setimageList] = useState([])
+    const isFocused = useIsFocused();
+
+    useEffect(() => {
+        console.log('uri')
+        RNFetchBlob.fs.ls('///storage/emulated/0/Android/data/com.mobiscan/files/Pictures').then((files) => {
+            console.log(files)
+            let matchedArray = files.filter(value => /\.(jpe?g|png|bmp|pdf)$/i.test(value))
+            setimageList(matchedArray)
+        })
+
+    }, [isFocused])
+
     //  Ask Permission
     const requestCameraPermission = async () => {
 
@@ -54,6 +70,7 @@ const HomeScreen = (props) => {
                 console.log('User tapped custom button: ', response.customButton);
             } else {
                 const imageObj = response.assets[0];
+                console.log(imageObj)
                 props.setImage(imageObj)
                 cropLast(imageObj)
             }
@@ -77,12 +94,12 @@ const HomeScreen = (props) => {
                 console.log('User tapped custom button: ', response.customButton);
             } else {
                 const imageObj = response.assets[0];
+                console.log(imageObj)
                 props.setImage(imageObj)
                 cropLast(imageObj)
                 // await setImageView({ imageView: true, imageClicked: imageObj, orderID: orderID });
             }
         })
-
     }
 
 
@@ -116,9 +133,9 @@ const HomeScreen = (props) => {
             width: 400,
             height: 400,
             freeStyleCropEnabled: true
-        }).then((image) => {
+        }).then(async (image) => {
             image['uri'] = image['path'];
-            props.setImage(image);
+            await props.setImage(image);
             navigateFilter(image)
 
         }).catch((e) => {
@@ -130,6 +147,18 @@ const HomeScreen = (props) => {
 
     return (
         <View style={styles.container}>
+            <ScrollView >
+                {
+                    imageList?.length > 0 ?
+                        imageList?.map((item) => {
+                            let value = '///storage/emulated/0/Android/data/com.mobiscan/files/Pictures ' + item
+                            return (
+                                <Text key={item}>{item} </Text>
+                            )
+                        }) : null
+                }
+            </ScrollView>
+
             <View>
                 <Text>Icon</Text>
             </View>
@@ -148,15 +177,17 @@ const HomeScreen = (props) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'space-evenly',
         alignItems: 'center'
     },
     pickerButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-around',
         backgroundColor: 'black',
-        borderRadius: 10
+        borderRadius: 10,
+        position: 'absolute',
+        bottom: 100,
+        alignSelf: 'center'
+
     },
     Icons: {
         padding: 10
