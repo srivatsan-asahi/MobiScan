@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 import {
     StyleSheet,
@@ -7,6 +7,9 @@ import {
     View,
     Image,
     FlatList,
+    Modal,
+    Button,
+    Alert,
     Dimensions,
     Pressable,
     TouchableOpacity,
@@ -16,168 +19,96 @@ import {
 import { connect } from 'react-redux';
 import { CAPTUREDIMAGE } from './redux/action';
 
-// Image filter Packages
-import {
-    ColorMatrix,
-    concatColorMatrices
-} from 'react-native-color-matrix-image-filters';
-import { negativefilter, normalfilter, greyScale } from '../assets/filters';
-
+import filters from '../assets/filters';
 // Image Converting and Sharing  Packages
-import Share from 'react-native-share';
-import RNImageToPdf from 'react-native-image-to-pdf';
-import RNFetchBlob from 'react-native-fetch-blob';
+
+import { CloseIcon, ShareIcon } from '../assets/icons';
 
 
 const FilterScreen = (props) => {
 
-    const { capturedImageUri, route } = props;
-
-
-    const [filterType, setfiltertype] = useState(normalfilter);
-    const [shareOption, setShareOption] = useState(false)
-    //    FilterList 
-    let filterdata = [
-        {
-            id: 1,
-            filterOption: normalfilter,
-            filterName: 'Normal',
-            hexCode: '#808080'
-        }
-        ,
-        {
-            id: 2,
-            filterOption: negativefilter,
-            filterName: 'Negative',
-            hexCode: '#808080'
-        }
-        ,
-        {
-            id: 3,
-            filterOption: greyScale,
-            filterName: 'GreyScale',
-            hexCode: '#808080'
-        }
-    ];
+    const { capturedImageUri, route, navigation } = props;
+    const [selectedFilterIndex, setIndex] = useState(0);
+    const [modalVisible, setModalVisible] = useState(false);
 
     // URI 
-    let uri = route.params.value.uri;
-    let pdfuri = uri.split('file://').pop().toString()
-    // Device Width and Height
-    const deviceWidth = Dimensions.get('window').width;
-    const deviceHeight = Dimensions.get('window').height;
+    let uri = useRef(route.params.value.uri);
+    // let pdfuri = uri.current.split('file://').pop().toString()
 
-    // PDF conversion functionality
-    function sharePDFWithAndroid(fileUrl, type) {
-        const base64Data = async (data) => {
-            const base64Data = ('data:application/pdf;base64,') + data
-            await Share.open({ url: base64Data }).then((err) => {
-                console.log(err)
-            })
-        }
-
-        RNFetchBlob.fs.readFile(fileUrl, 'base64')
-            .then(async (data) => {
-                await base64Data(data)
-
-            }).catch((err) => {
-                console.log(err)
-            });
-    }
-
-    const myAsyncPDFFunction = async () => {
-        try {
-            const options = {
-                imagePaths: [pdfuri],
-                // to convert Bin to pdf file this naming is needed
-                name: 'PDFName.pdf',
-                maxSize: { // optional maximum image dimension - larger images will be resized
-                    width: 900,
-                    height: Math.round(deviceHeight / deviceWidth * 900),
-                },
-                quality: .7, // optional compression paramter
-                targetPathRN: "/storage/emulated/0/Download/", // only for android version 9 and lower
-                //for versions higher than 9 it is stored in (Download/img-to-pdf/)
-            };
-            const pdf = await RNImageToPdf.createPDFbyImages(options);
-            sharePDFWithAndroid(pdf.filePath)
-
-        } catch (e) {
-            console.log(e);
-        }
-    }
-
-    const ShareAsImage = async () => {
-
-
-        const shareOption = await Share.open(
-            {
-                url: route.params.value.uri
-            }
-        ).then((res) => {
-
-            console.log(res)
-        }).catch((err) => {
-            console.log(err)
-        });
-
-
-
-
-
-    };
 
     // Filter List
 
-    const renderItem = useCallback(({ item }) => {
-        return (
-
-            <Pressable onPress={() => {
-
-                setfiltertype(item.filterOption)
-            }}>
-                <View style={[styles.filterlistView, { backgroundColor: item.hexCode }]} >
-                    <Text>{item.filterName}</Text>
-                </View>
-            </Pressable>
-
+    const renderFilterComponent = ({ item, index }) => {
+        const FilterComponent = item.filterComponent;
+        const image = (
+            <Image
+                style={{ width: '100%', height: '100%' }}
+                source={{ uri: uri.current }}
+                resizeMode={'contain'}
+            />
         );
-    }, []);
 
-    const keyExtractor = useCallback((item) => {
-        return item.id;
-    }, []);
+        return (
+            <TouchableOpacity style={{ justifyContent: 'space-evenly' }} onPress={() => onSelectFilter(index)}>
+                <FilterComponent image={image} />
+                <Text >{item.title}</Text>
+            </TouchableOpacity>
+        );
+    };
+
+    const onExtractImage = ({ nativeEvent }) => {
+        uri.current = nativeEvent.uri;
+    };
+
+    const onSelectFilter = selectedIndex => {
+        setIndex(selectedIndex);
+    };
+
+    const SelectedFilterComponent = filters.FILTERS[selectedFilterIndex].filterComponent;
 
 
 
-
-
+    //  Share Option 
+    React.useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <Pressable onPress={() => {
+                    console.log("hello worl")
+                    navigation.navigate('ShareScreen', { uri: uri })
+                }}>
+                    <ShareIcon />
+                </Pressable>
+            ),
+        });
+    }, [navigation]);
 
     return (
 
         <View style={styles.container}>
-            <TouchableOpacity onPress={ShareAsImage}>
-                <Text>ShareAsImage</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={myAsyncPDFFunction}>
-                <Text>ShareAsPdf</Text>
-            </TouchableOpacity>
-            <ColorMatrix
-                style={{ width: '90%', height: '90%', justifyContent: 'center', alignItems: 'center' }}
-                matrix={concatColorMatrices([filterType])}
-            >
-
+            {selectedFilterIndex === 0 ? (
                 <Image
-                    style={{ width: '100%', height: '100%' }}
-                    source={{ uri: uri }}
+                    style={styles.image}
+                    source={{ uri: uri.current }}
                     resizeMode={'contain'}
                 />
+            ) : (
+                <SelectedFilterComponent
+                    onExtractImage={onExtractImage}
+                    extractImageEnabled={true}
+                    image={
+                        <Image
+                            style={styles.image}
+                            source={{ uri: uri.current }}
+                            resizeMode={'contain'}
+                        />
+                    }
+                />
+            )}
 
-            </ColorMatrix>
             <FlatList
-                data={filterdata}
-                renderItem={renderItem}
-                keyExtractor={keyExtractor}
+                data={filters.FILTERS}
+                renderItem={renderFilterComponent}
+                keyExtractor={item => item.title}
                 horizontal={true}
             />
 
@@ -211,6 +142,37 @@ const styles = StyleSheet.create({
         margin: 10,
         width: 20,
         height: 20,
-    }
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    modalView: {
+        marginVertical: '20%',
+        marginHorizontal: 30,
+        backgroundColor: "white",
+        borderRadius: 10,
+        padding: 25,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: "center"
+    },
+    image: {
+        width: 520,
+        height: 520,
+        marginVertical: 10,
+        alignSelf: 'center',
+    },
 
 });
