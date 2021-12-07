@@ -22,7 +22,7 @@ import { CAPTUREDIMAGE } from './redux/action';
 import filters from '../assets/filters';
 // Image Converting and Sharing  Packages
 
-import { CloseIcon, SaveIcon, ShareIcon } from '../assets/icons';
+import { BackArrowIcon, CloseIcon, SaveIcon, ShareIcon } from '../assets/icons';
 
 
 const FilterScreen = (props) => {
@@ -77,6 +77,13 @@ const FilterScreen = (props) => {
                     navigation.navigate('ShareScreen', { uri: uri })
                 }}>
                     <SaveIcon />
+                </Pressable>
+            ),
+            headerLeft: () => (
+                <Pressable style={{ justifyContent: 'center', alignItems: 'center', marginRight: 20, marginTop: 2, alignSelf: 'center' }} onPress={() => {
+                    navigation.navigate('Home')
+                }}>
+                    <BackArrowIcon />
                 </Pressable>
             ),
         });

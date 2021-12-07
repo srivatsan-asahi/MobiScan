@@ -18,7 +18,7 @@ import {
 import Share from 'react-native-share';
 import RNImageToPdf from 'react-native-image-to-pdf';
 import RNFetchBlob from 'react-native-fetch-blob';
-import { ImageSaved } from '../assets/icons';
+import { BackArrowIcon, ImageSaved } from '../assets/icons';
 
 
 
@@ -87,6 +87,17 @@ const ShareScreen = (props) => {
             console.log(err)
         });
     };
+    React.useLayoutEffect(() => {
+        navigation.setOptions({
+            headerLeft: () => (
+                <Pressable style={{ justifyContent: 'center', alignItems: 'center', marginRight: 20, marginTop: 2 }} onPress={() => {
+                    navigation.navigate('Home')
+                }}>
+                    <BackArrowIcon />
+                </Pressable>
+            ),
+        });
+    }, [navigation]);
 
     return (
         <View style={styles.container}>

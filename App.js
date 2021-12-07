@@ -43,7 +43,6 @@ const App = () => {
         <Stack.Navigator>
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen
-
             name="FilterScreen"
             component={filterScreen} />
           <Stack.Screen name="ShareScreen" component={ShareScreen} />
