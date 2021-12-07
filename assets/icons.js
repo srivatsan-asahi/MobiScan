@@ -15,12 +15,18 @@ export const ShareIcon = () => <Icon name="share" size={30} color="#900" />
 
 export const CloseIcon = () => <EditIcon name="close-circle" size={25} color="#900" />
 
+export const SaveIcon = () => <Icon name="save" size={30} color="#900" />
+
+export const ImageSaved = () => <Icon name="folder-images" size={35} color="#900" />
+
 export default {
     CameraIcon,
     ShareIcon,
     GalleryIcon,
     CropIcon,
     CloseIcon,
-    ImageEdit
+    ImageEdit,
+    SaveIcon,
+    ImageSaved
 }
 

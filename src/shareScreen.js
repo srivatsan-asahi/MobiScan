@@ -18,6 +18,7 @@ import {
 import Share from 'react-native-share';
 import RNImageToPdf from 'react-native-image-to-pdf';
 import RNFetchBlob from 'react-native-fetch-blob';
+import { ImageSaved } from '../assets/icons';
 
 
 
@@ -88,16 +89,31 @@ const ShareScreen = (props) => {
     };
 
     return (
+        <View style={styles.container}>
+            <View>
+                {
+                    uri ?
+                        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                            <ImageSaved />
+                            <Text style={{ fontSize: 25 }}>Image Saved SuccesFully !!</Text>
+                        </View>
 
+                        :
+                        null
+                }
+            </View>
+            <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
+                <TouchableOpacity style={{ margin: 10 }}>
+                    <Text>Open</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={{ margin: 10 }} onPress={ShareAsImage}>
+                    <Text>ShareAsImage</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={{ margin: 10 }} onPress={myAsyncPDFFunction}>
+                    <Text>ShareAsPdf</Text>
+                </TouchableOpacity>
+            </View>
 
-        <View >
-
-            <TouchableOpacity onPress={ShareAsImage}>
-                <Text>ShareAsImage</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={myAsyncPDFFunction}>
-                <Text>ShareAsPdf</Text>
-            </TouchableOpacity>
         </View>
     );
 }

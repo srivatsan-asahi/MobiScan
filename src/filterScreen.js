@@ -22,7 +22,7 @@ import { CAPTUREDIMAGE } from './redux/action';
 import filters from '../assets/filters';
 // Image Converting and Sharing  Packages
 
-import { CloseIcon, ShareIcon } from '../assets/icons';
+import { CloseIcon, SaveIcon, ShareIcon } from '../assets/icons';
 
 
 const FilterScreen = (props) => {
@@ -68,15 +68,15 @@ const FilterScreen = (props) => {
 
 
 
-    //  Share Option 
+    //  Header save Option
     React.useLayoutEffect(() => {
         navigation.setOptions({
             headerRight: () => (
-                <Pressable onPress={() => {
+                <Pressable style={{ justifyContent: 'center', alignItems: 'center' }} onPress={() => {
                     console.log("hello worl")
                     navigation.navigate('ShareScreen', { uri: uri })
                 }}>
-                    <ShareIcon />
+                    <SaveIcon />
                 </Pressable>
             ),
         });
