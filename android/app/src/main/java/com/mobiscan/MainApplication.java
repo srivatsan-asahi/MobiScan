@@ -4,6 +4,8 @@ import android.app.Application;
 import android.content.Context;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
+import fr.snapp.imagebase64.RNImgToBase64Package;
+import com.RNFetchBlob.RNFetchBlobPackage;
 
 
 

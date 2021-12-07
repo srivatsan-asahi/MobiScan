@@ -1,111 +1,114 @@
-// React Native Camera
-// https://aboutreact.com/react-native-camera/
 
-// import React in our code
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 
-// import all the components we are going to use
 import {
-    SafeAreaView,
     StyleSheet,
     Text,
     View,
-    TouchableOpacity,
     Image,
-    PermissionsAndroid,
     FlatList,
-    Platform,
-    TouchableHighlight,
+    Modal,
+    Button,
+    Alert,
+    Dimensions,
     Pressable,
+    TouchableOpacity,
 } from 'react-native';
 
+// Redux Packages
 import { connect } from 'react-redux';
-import ImagePicker from 'react-native-image-crop-picker';
-
 import { CAPTUREDIMAGE } from './redux/action';
-import { CropIcon, ImageEdit } from '../assets/icons';
-import {
-    ColorMatrix,
-    concatColorMatrices
-} from 'react-native-color-matrix-image-filters';
-import { negativefilter, normalfilter, greyScale } from '../assets/filters';
 
+import filters from '../assets/filters';
+// Image Converting and Sharing  Packages
 
+import { CloseIcon, ShareIcon } from '../assets/icons';
 
 
 const FilterScreen = (props) => {
-    const { capturedImageUri, route } = props;
 
-    const [filterType, setfiltertype] = useState(normalfilter)
+    const { capturedImageUri, route, navigation } = props;
+    const [selectedFilterIndex, setIndex] = useState(0);
+    const [modalVisible, setModalVisible] = useState(false);
 
-    let uri = route.params.value.uri;
+    // URI 
+    let uri = useRef(route.params.value.uri);
+    // let pdfuri = uri.current.split('file://').pop().toString()
 
-    let filterdata = [
-        {
-            id: 1,
-            filterOption: normalfilter,
-            filterName: 'Normal',
-            hexCode: '#808080'
-        }
-        ,
-        {
-            id: 2,
-            filterOption: negativefilter,
-            filterName: 'Negative',
-            hexCode: '#808080'
-        }
-        ,
-        {
-            id: 3,
-            filterOption: greyScale,
-            filterName: 'GreyScale',
-            hexCode: '#808080'
-        }
-    ];
 
-    const renderItem = useCallback(({ item }) => {
-        return (
+    // Filter List
 
-            <Pressable onPress={() => {
-
-                setfiltertype(item.filterOption)
-            }}>
-                <View style={[styles.filterlistView, { backgroundColor: item.hexCode }]} >
-                    <Text>{item.filterName}</Text>
-                </View>
-            </Pressable>
-
+    const renderFilterComponent = ({ item, index }) => {
+        const FilterComponent = item.filterComponent;
+        const image = (
+            <Image
+                style={{ width: '100%', height: '100%' }}
+                source={{ uri: uri.current }}
+                resizeMode={'contain'}
+            />
         );
-    }, []);
 
-    const keyExtractor = useCallback((item) => {
-        return item.id;
-    }, []);
+        return (
+            <TouchableOpacity style={{ justifyContent: 'space-evenly' }} onPress={() => onSelectFilter(index)}>
+                <FilterComponent image={image} />
+                <Text >{item.title}</Text>
+            </TouchableOpacity>
+        );
+    };
+
+    const onExtractImage = ({ nativeEvent }) => {
+        uri.current = nativeEvent.uri;
+    };
+
+    const onSelectFilter = selectedIndex => {
+        setIndex(selectedIndex);
+    };
+
+    const SelectedFilterComponent = filters.FILTERS[selectedFilterIndex].filterComponent;
 
 
 
+    //  Share Option 
+    React.useLayoutEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <Pressable onPress={() => {
+                    console.log("hello worl")
+                    navigation.navigate('ShareScreen', { uri: uri })
+                }}>
+                    <ShareIcon />
+                </Pressable>
+            ),
+        });
+    }, [navigation]);
 
     return (
-        <View style={styles.container}>
-            <Pressable>
-                <Text>Share</Text>
-            </Pressable>
-            <ColorMatrix
-                style={{ width: '90%', height: '90%', justifyContent: 'center', alignItems: 'center' }}
-                matrix={concatColorMatrices([filterType])}
-            >
 
+        <View style={styles.container}>
+            {selectedFilterIndex === 0 ? (
                 <Image
-                    style={{ width: '100%', height: '100%' }}
-                    source={{ uri: uri }}
+                    style={styles.image}
+                    source={{ uri: uri.current }}
                     resizeMode={'contain'}
                 />
+            ) : (
+                <SelectedFilterComponent
+                    onExtractImage={onExtractImage}
+                    extractImageEnabled={true}
+                    image={
+                        <Image
+                            style={styles.image}
+                            source={{ uri: uri.current }}
+                            resizeMode={'contain'}
+                        />
+                    }
+                />
+            )}
 
-            </ColorMatrix>
             <FlatList
-                data={filterdata}
-                renderItem={renderItem}
-                keyExtractor={keyExtractor}
+                data={filters.FILTERS}
+                renderItem={renderFilterComponent}
+                keyExtractor={item => item.title}
                 horizontal={true}
             />
 
@@ -139,6 +142,37 @@ const styles = StyleSheet.create({
         margin: 10,
         width: 20,
         height: 20,
-    }
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    modalView: {
+        marginVertical: '20%',
+        marginHorizontal: 30,
+        backgroundColor: "white",
+        borderRadius: 10,
+        padding: 25,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+    },
+    modalText: {
+        marginBottom: 15,
+        textAlign: "center"
+    },
+    image: {
+        width: 520,
+        height: 520,
+        marginVertical: 10,
+        alignSelf: 'center',
+    },
 
 });

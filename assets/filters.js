@@ -1,26 +1,55 @@
 import React, { Component } from 'react';
 
+
 import {
-    Grayscale,
-    Sepia,
-    Tint,
-    ColorMatrix,
-    concatColorMatrices,
-    invert,
-    normal,
-    contrast,
-    saturate,
-} from 'react-native-color-matrix-image-filters';
+    AdenCompat,
+    _1977Compat,
+    BrannanCompat,
+    BrooklynCompat,
+    ClarendonCompat,
+    EarlybirdCompat,
+    GinghamCompat,
+    HudsonCompat,
+    InkwellCompat,
+    KelvinCompat,
+    LarkCompat,
+    LofiCompat,
+    MavenCompat,
+    MayfairCompat,
+    MoonCompat,
+    NashvilleCompat,
+    PerpetuaCompat,
+    ReyesCompat,
+    RiseCompat,
+    SlumberCompat,
+    StinsonCompat,
+    ToasterCompat,
+    ValenciaCompat,
+    WaldenCompat,
+    WillowCompat,
+    Xpro2Compat,
+} from 'react-native-image-filter-kit';
 
-export const normalfilter = [normal(1)]
 
-export const negativefilter = [saturate(1), contrast(1), invert(1)];
 
-export const greyScale = [saturate(1.5), contrast(1.5), invert(0)];
+const FILTERS = [
+    {
+        title: 'Normal',
+        filterComponent: AdenCompat,
+    },
+    {
+        title: 'Maven',
+        filterComponent: MavenCompat,
+    },
+    {
+        title: 'Mayfair',
+        filterComponent: MayfairCompat,
+    },
+
+
+];
 
 
 export default {
-    normalfilter,
-    negativefilter,
-    greyScale
+    FILTERS
 }
