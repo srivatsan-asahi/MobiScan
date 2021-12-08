@@ -21,7 +21,7 @@ import { CAPTUREDIMAGE } from './redux/action';
 
 import filters from '../assets/filters';
 // Image Converting and Sharing  Packages
-
+import ImagePicker from 'react-native-image-crop-picker';
 import { BackArrowIcon, CloseIcon, SaveIcon, ShareIcon } from '../assets/icons';
 import CameraRoll from '@react-native-community/cameraroll'
 
@@ -32,9 +32,38 @@ const FilterScreen = (props) => {
     const [modalVisible, setModalVisible] = useState(false);
 
     // URI 
-    console.log(route.params.value.uri)
+
     let uri = useRef(route.params.value.uri);
     // let pdfuri = uri.current.split('file://').pop().toString()
+
+
+    // CropData
+    function cropLast(data) {
+        console.log(data, "<====Data")
+        if (!data) {
+            return Alert.alert(
+                'No image',
+                'Before open cropping only, please select image'
+            );
+        }
+        ImagePicker.openCropper({
+            path: data.current,
+            width: 400,
+            height: 400,
+            freeStyleCropEnabled: true
+        }).then(async (image) => {
+            image['uri'] = image['path'];
+            await props.setImage(image);
+        }).catch((e) => {
+            if (e.code == 'E_PICKER_CANCELLED') {
+                navigation.navigate("Home")
+            } else {
+                console.log(e)
+            }
+        });
+
+    };
+
 
 
     // Filter List
@@ -90,7 +119,7 @@ const FilterScreen = (props) => {
             ),
             headerLeft: () => (
                 <Pressable style={{ justifyContent: 'center', alignItems: 'center', marginRight: 20, marginTop: 2, alignSelf: 'center' }} onPress={() => {
-                    navigation.navigate('Home')
+                    cropLast(uri)
                 }}>
                     <BackArrowIcon />
                 </Pressable>

@@ -10,22 +10,46 @@ import { connect } from 'react-redux';
 import ImagePicker from 'react-native-image-crop-picker';
 import RNFetchBlob from 'react-native-fetch-blob'
 import { useIsFocused } from '@react-navigation/native';
-import FastImage from 'react-native-fast-image';
+
 const HomeScreen = (props) => {
 
-    const { navigation } = props;
+    const { navigation, route } = props;
     const [imageList, setimageList] = useState([])
     const isFocused = useIsFocused();
 
     useEffect(() => {
-        console.log('uri', RNFetchBlob.fs.dirs.DocumentDir)
         RNFetchBlob.fs.ls(RNFetchBlob.fs.dirs.DCIMDir).then((files) => {
             console.log(files)
             let matchedArray = files.filter(value => /\.(jpe?g|png|bmp|pdf)$/i.test(value))
             setimageList(matchedArray)
         })
-
     }, [isFocused])
+
+    // CropData
+    function cropLast(data) {
+        if (!data) {
+            return Alert.alert(
+                'No image',
+                'Before open cropping only, please select image'
+            );
+        }
+        ImagePicker.openCropper({
+            path: data.uri ? data.uri : data,
+            width: 400,
+            height: 400,
+            freeStyleCropEnabled: true
+        }).then(async (image) => {
+            image['uri'] = image['path'];
+            await props.setImage(image);
+            navigateFilter(image)
+
+        }).catch((e) => {
+            console.log(e);
+        });
+
+    };
+
+
 
     //  Ask Permission
     const requestCameraPermission = async () => {
@@ -41,7 +65,6 @@ const HomeScreen = (props) => {
                     buttonPositive: "OK"
                 }
             );
-            console.log(granted)
             if (granted === PermissionsAndroid.RESULTS.GRANTED) {
                 return console.log("hello")
             }
@@ -70,8 +93,8 @@ const HomeScreen = (props) => {
                 console.log('User tapped custom button: ', response.customButton);
             } else {
                 const imageObj = response.assets[0];
-                console.log(imageObj)
                 props.setImage(imageObj)
+                console.log(imageObj, "<=====imageObj")
                 cropLast(imageObj)
             }
         })
@@ -94,7 +117,6 @@ const HomeScreen = (props) => {
                 console.log('User tapped custom button: ', response.customButton);
             } else {
                 const imageObj = response.assets[0];
-                console.log(imageObj)
                 props.setImage(imageObj)
                 cropLast(imageObj)
                 // await setImageView({ imageView: true, imageClicked: imageObj, orderID: orderID });
@@ -121,29 +143,7 @@ const HomeScreen = (props) => {
     }
 
 
-    function cropLast(data) {
-        if (!data) {
-            return Alert.alert(
-                'No image',
-                'Before open cropping only, please select image'
-            );
-        }
-        ImagePicker.openCropper({
-            path: data.uri,
-            width: 400,
-            height: 400,
-            freeStyleCropEnabled: true
-        }).then(async (image) => {
-            console.log(image, "Image")
-            image['uri'] = image['path'];
-            await props.setImage(image);
-            navigateFilter(image)
 
-        }).catch((e) => {
-            console.log(e);
-        });
-
-    };
 
     //Image card
 
