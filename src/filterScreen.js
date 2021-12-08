@@ -23,7 +23,7 @@ import filters from '../assets/filters';
 // Image Converting and Sharing  Packages
 
 import { BackArrowIcon, CloseIcon, SaveIcon, ShareIcon } from '../assets/icons';
-
+import CameraRoll from '@react-native-community/cameraroll'
 
 const FilterScreen = (props) => {
 
@@ -32,6 +32,7 @@ const FilterScreen = (props) => {
     const [modalVisible, setModalVisible] = useState(false);
 
     // URI 
+    console.log(route.params.value.uri)
     let uri = useRef(route.params.value.uri);
     // let pdfuri = uri.current.split('file://').pop().toString()
 
@@ -57,7 +58,11 @@ const FilterScreen = (props) => {
     };
 
     const onExtractImage = ({ nativeEvent }) => {
-        uri.current = nativeEvent.uri;
+        console.log(nativeEvent.uri)
+        uri.current = nativeEvent.uri
+        console.log(uri.current)
+
+
     };
 
     const onSelectFilter = selectedIndex => {
@@ -73,7 +78,11 @@ const FilterScreen = (props) => {
         navigation.setOptions({
             headerRight: () => (
                 <Pressable style={{ justifyContent: 'center', alignItems: 'center' }} onPress={() => {
-                    console.log("hello worl")
+                    CameraRoll.saveToCameraRoll(uri.current)
+                        .then(() => {
+                            console.log("Save")
+                        })
+                        .catch(err => console.log('err:', err))
                     navigation.navigate('ShareScreen', { uri: uri })
                 }}>
                     <SaveIcon />

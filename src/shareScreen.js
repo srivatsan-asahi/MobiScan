@@ -47,7 +47,6 @@ const ShareScreen = (props) => {
         RNFetchBlob.fs.readFile(fileUrl, 'base64')
             .then(async (data) => {
                 await base64Data(data)
-
             }).catch((err) => {
                 console.log(err)
             });
@@ -114,7 +113,7 @@ const ShareScreen = (props) => {
                 }
             </View>
             <View style={{ justifyContent: 'space-between', flexDirection: 'row' }}>
-                <TouchableOpacity style={{ margin: 10 }}>
+                <TouchableOpacity onPress={() => { navigation.navigate('Home') }} style={{ margin: 10 }}>
                     <Text>Open</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={{ margin: 10 }} onPress={ShareAsImage}>
