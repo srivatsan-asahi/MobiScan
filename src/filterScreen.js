@@ -59,7 +59,10 @@ const FilterScreen = (props) => {
 
     const onExtractImage = ({ nativeEvent }) => {
         console.log(nativeEvent.uri)
-        uri.current = nativeEvent.uri;
+        uri.current = nativeEvent.uri
+        console.log(uri.current)
+
+
     };
 
     const onSelectFilter = selectedIndex => {
@@ -75,7 +78,11 @@ const FilterScreen = (props) => {
         navigation.setOptions({
             headerRight: () => (
                 <Pressable style={{ justifyContent: 'center', alignItems: 'center' }} onPress={() => {
-                    console.log("hello worl")
+                    CameraRoll.saveToCameraRoll(uri.current)
+                        .then(() => {
+                            console.log("Save")
+                        })
+                        .catch(err => console.log('err:', err))
                     navigation.navigate('ShareScreen', { uri: uri })
                 }}>
                     <SaveIcon />

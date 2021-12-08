@@ -1,7 +1,7 @@
 import React, { Component, useEffect, useRef, useState } from 'react';
 import {
     Text, View, Pressable, StyleSheet, PermissionsAndroid,
-    Alert, FlatList, ScrollView, Image
+    Alert, FlatList, ScrollView, Image, SafeAreaView
 } from 'react-native';
 import { CameraIcon, GalleryIcon } from '../assets/icons';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import ImagePicker from 'react-native-image-crop-picker';
 import RNFetchBlob from 'react-native-fetch-blob'
 import { useIsFocused } from '@react-navigation/native';
-
+import FastImage from 'react-native-fast-image';
 const HomeScreen = (props) => {
 
     const { navigation } = props;
@@ -18,8 +18,8 @@ const HomeScreen = (props) => {
     const isFocused = useIsFocused();
 
     useEffect(() => {
-        console.log('uri')
-        RNFetchBlob.fs.ls('///storage/emulated/0/Android/data/com.mobiscan/files/Pictures').then((files) => {
+        console.log('uri', RNFetchBlob.fs.dirs.DocumentDir)
+        RNFetchBlob.fs.ls(RNFetchBlob.fs.dirs.DCIMDir).then((files) => {
             console.log(files)
             let matchedArray = files.filter(value => /\.(jpe?g|png|bmp|pdf)$/i.test(value))
             setimageList(matchedArray)
@@ -134,6 +134,7 @@ const HomeScreen = (props) => {
             height: 400,
             freeStyleCropEnabled: true
         }).then(async (image) => {
+            console.log(image, "Image")
             image['uri'] = image['path'];
             await props.setImage(image);
             navigateFilter(image)
@@ -144,24 +145,56 @@ const HomeScreen = (props) => {
 
     };
 
+    //Image card
+
+
+
+
 
     return (
+
         <View style={styles.container}>
-            <ScrollView >
+            <ScrollView>
                 {
                     imageList?.length > 0 ?
-                        imageList?.map((item) => {
-                            let value = '///storage/emulated/0/Android/data/com.mobiscan/files/Pictures ' + item
-                            return (
-                                <Text key={item}>{item} </Text>
-                            )
-                        }) : null
-                }
-            </ScrollView>
+                        <FlatList
+                            contentContainerStyle={{ alignSelf: 'center', width: '90%', alignItems: 'center', justifyContent: 'center' }}
+                            numColumns={2}
+                            showsVerticalScrollIndicator={false}
+                            showsHorizontalScrollIndicator={false}
+                            data={imageList}
+                            keyExtractor={item => item}
+                            renderItem={(item) => {
+                                let value = 'file://' + RNFetchBlob.fs.dirs.DCIMDir + '/' + item.item
+                                return (
+                                    <View style={{
+                                        width: '45%',
+                                        height: 200,
+                                        margin: 10,
+                                        padding: 5,
+                                        alignSelf: 'center',
+                                        alignItems: 'center',
+                                        borderRadius: 15,
+                                        backgroundColor: '#FFFFFF',
+                                        borderWidth: 1,
+                                        overflow: 'hidden'
+                                    }} key={value}>
+                                        <Image
+                                            style={{
+                                                width: '100%',
+                                                height: '70%', borderWidth: 1
+                                            }}
+                                            source={{ uri: value }}
+                                        />
+                                    </View>
+                                )
 
-            <View>
-                <Text>Icon</Text>
-            </View>
+                            }}
+                        />
+                        : null
+                }
+
+            </ScrollView>
             <View style={styles.pickerButton}>
                 <Pressable style={styles.Icons} onPress={onPressCamera}>
                     <CameraIcon />
@@ -172,12 +205,12 @@ const HomeScreen = (props) => {
             </View>
 
         </View>
+
     );
 }
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center'
     },
     pickerButton: {
         flexDirection: 'row',
