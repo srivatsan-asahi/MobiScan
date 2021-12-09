@@ -38,17 +38,16 @@ const App = () => {
 
 
   return (
-    <Provider store={store}>
-      <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen
-            name="FilterScreen"
-            component={filterScreen} />
-          <Stack.Screen name="ShareScreen" component={ShareScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </Provider>
+
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen
+          name="FilterScreen"
+          component={filterScreen} />
+        <Stack.Screen name="ShareScreen" component={ShareScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
 

@@ -15,9 +15,7 @@ import {
     TouchableOpacity,
 } from 'react-native';
 
-// Redux Packages
-import { connect } from 'react-redux';
-import { CAPTUREDIMAGE } from './redux/action';
+
 
 import filters from '../assets/filters';
 // Image Converting and Sharing  Packages
@@ -27,19 +25,17 @@ import CameraRoll from '@react-native-community/cameraroll'
 
 const FilterScreen = (props) => {
 
-    const { capturedImageUri, route, navigation } = props;
-    const [selectedFilterIndex, setIndex] = useState(0);
-    const [modalVisible, setModalVisible] = useState(false);
-
+    const { route, navigation, setImage } = props;
     // URI 
-
     let uri = useRef(route.params.value.uri);
+    const [selectedFilterIndex, setIndex] = useState(0);
+    const [imageuri, seteditedImageUri] = useState(uri)
+
     // let pdfuri = uri.current.split('file://').pop().toString()
 
 
     // CropData
     function cropLast(data) {
-        console.log(data, "<====Data")
         if (!data) {
             return Alert.alert(
                 'No image',
@@ -47,13 +43,14 @@ const FilterScreen = (props) => {
             );
         }
         ImagePicker.openCropper({
-            path: data.current,
+            path: data,
             width: 400,
             height: 400,
             freeStyleCropEnabled: true
         }).then(async (image) => {
-            image['uri'] = image['path'];
-            await props.setImage(image);
+            // image['uri'] = image['path'];
+            // await setImage({ current: image['path'] })
+            seteditedImageUri({ current: image['path'] }) //Local State
         }).catch((e) => {
             if (e.code == 'E_PICKER_CANCELLED') {
                 navigation.navigate("Home")
@@ -73,7 +70,7 @@ const FilterScreen = (props) => {
         const image = (
             <Image
                 style={{ width: '100%', height: '100%' }}
-                source={{ uri: uri.current }}
+                source={{ uri: imageuri.current }}
                 resizeMode={'contain'}
             />
         );
@@ -87,11 +84,7 @@ const FilterScreen = (props) => {
     };
 
     const onExtractImage = ({ nativeEvent }) => {
-        console.log(nativeEvent.uri)
         uri.current = nativeEvent.uri
-        console.log(uri.current)
-
-
     };
 
     const onSelectFilter = selectedIndex => {
@@ -107,19 +100,21 @@ const FilterScreen = (props) => {
         navigation.setOptions({
             headerRight: () => (
                 <Pressable style={{ justifyContent: 'center', alignItems: 'center' }} onPress={() => {
-                    CameraRoll.saveToCameraRoll(uri.current)
+                    let savedUri = imageuri?.current
+                    CameraRoll.saveToCameraRoll(savedUri)
                         .then(() => {
-                            console.log("Save")
+                            navigation.navigate('ShareScreen', { value: uri })
                         })
                         .catch(err => console.log('err:', err))
-                    navigation.navigate('ShareScreen', { uri: uri })
+
                 }}>
                     <SaveIcon />
                 </Pressable>
             ),
             headerLeft: () => (
                 <Pressable style={{ justifyContent: 'center', alignItems: 'center', marginRight: 20, marginTop: 2, alignSelf: 'center' }} onPress={() => {
-                    cropLast(uri)
+                    let savedUri = imageuri?.current
+                    cropLast(savedUri)
                 }}>
                     <BackArrowIcon />
                 </Pressable>
@@ -133,7 +128,7 @@ const FilterScreen = (props) => {
             {selectedFilterIndex === 0 ? (
                 <Image
                     style={styles.image}
-                    source={{ uri: uri.current }}
+                    source={{ uri: imageuri.current }}
                     resizeMode={'contain'}
                 />
             ) : (
@@ -143,7 +138,7 @@ const FilterScreen = (props) => {
                     image={
                         <Image
                             style={styles.image}
-                            source={{ uri: uri.current }}
+                            source={{ uri: imageuri.current }}
                             resizeMode={'contain'}
                         />
                     }
@@ -162,6 +157,7 @@ const FilterScreen = (props) => {
 };
 
 const mapStateToProps = state => {
+    console.log(state.ImageReduce.capturedImage, "<===Captuers")
     return {
         capturedImageUri: state.ImageReduce.capturedImage
     }
@@ -174,7 +170,7 @@ const mapDispatchToProps = dispatch => {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(FilterScreen);
+export default FilterScreen;
 
 const styles = StyleSheet.create({
     container: {
