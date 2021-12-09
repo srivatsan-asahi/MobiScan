@@ -1,7 +1,7 @@
 import React, { Component, useEffect, useRef, useState } from 'react';
 import {
     Text, View, Pressable, StyleSheet, PermissionsAndroid,
-    Alert, FlatList, ScrollView, Image, SafeAreaView
+    Alert, FlatList, ScrollView, Image, SafeAreaView, TouchableOpacity
 } from 'react-native';
 import { CameraIcon, GalleryIcon } from '../assets/icons';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
@@ -172,7 +172,10 @@ const HomeScreen = (props) => {
                             renderItem={(item) => {
                                 let value = 'file://' + RNFetchBlob.fs.dirs.DCIMDir + '/' + item.item
                                 return (
-                                    <View style={{
+
+                                    <TouchableOpacity onPress={() => {
+                                        navigation.navigate('ImageshareScreen', { currentUri: value })
+                                    }} style={{
                                         width: '45%',
                                         height: 150,
                                         margin: 10,
@@ -189,7 +192,7 @@ const HomeScreen = (props) => {
                                             }}
                                             source={{ uri: value }}
                                         />
-                                    </View>
+                                    </TouchableOpacity>
                                 )
 
                             }}

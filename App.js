@@ -28,6 +28,7 @@ import { store } from './src/redux/store';
 import filterScreen from './src/filterScreen';
 import { ImageEdit, ShareIcon } from './assets/icons';
 import ShareScreen from './src/shareScreen';
+import ImageshareScreen from './src/ImageshareScreen';
 
 
 
@@ -46,6 +47,7 @@ const App = () => {
           name="FilterScreen"
           component={filterScreen} />
         <Stack.Screen name="ShareScreen" component={ShareScreen} />
+        <Stack.Screen name="ImageshareScreen" component={ImageshareScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
