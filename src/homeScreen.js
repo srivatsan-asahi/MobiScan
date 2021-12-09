@@ -5,11 +5,11 @@ import {
 } from 'react-native';
 import { CameraIcon, GalleryIcon } from '../assets/icons';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import { CAPTUREDIMAGE } from "./redux/action/index";
-import { connect } from 'react-redux';
+
 import ImagePicker from 'react-native-image-crop-picker';
 import RNFetchBlob from 'react-native-fetch-blob'
 import { useIsFocused } from '@react-navigation/native';
+
 
 const HomeScreen = (props) => {
 
@@ -19,7 +19,6 @@ const HomeScreen = (props) => {
 
     useEffect(() => {
         RNFetchBlob.fs.ls(RNFetchBlob.fs.dirs.DCIMDir).then((files) => {
-            console.log(files)
             let matchedArray = files.filter(value => /\.(jpe?g|png|bmp|pdf)$/i.test(value))
             setimageList(matchedArray)
         })
@@ -34,13 +33,13 @@ const HomeScreen = (props) => {
             );
         }
         ImagePicker.openCropper({
-            path: data.uri ? data.uri : data,
+            path: data ? data.uri : data,
             width: 400,
             height: 400,
             freeStyleCropEnabled: true
         }).then(async (image) => {
             image['uri'] = image['path'];
-            await props.setImage(image);
+
             navigateFilter(image)
 
         }).catch((e) => {
@@ -48,6 +47,8 @@ const HomeScreen = (props) => {
         });
 
     };
+
+
 
 
 
@@ -74,9 +75,17 @@ const HomeScreen = (props) => {
 
     };
 
+    useEffect(() => {
+        requestCameraPermission().then((res) => {
+            console.log(res)
+        }).catch((e) => {
+            console.log(e)
+        })
+    }, [])
+
     // Take the Picture
 
-    const openCamera = () => {
+    const openCamera = async () => {
         const options = {
             storageOptions: {
                 path: 'images',
@@ -93,11 +102,14 @@ const HomeScreen = (props) => {
                 console.log('User tapped custom button: ', response.customButton);
             } else {
                 const imageObj = response.assets[0];
-                props.setImage(imageObj)
-                console.log(imageObj, "<=====imageObj")
+                // await props.setImage(imageObj)
                 cropLast(imageObj)
             }
         })
+
+
+
+
     };
 
     const openImageGallery = () => {
@@ -117,18 +129,16 @@ const HomeScreen = (props) => {
                 console.log('User tapped custom button: ', response.customButton);
             } else {
                 const imageObj = response.assets[0];
-                props.setImage(imageObj)
+                // props.setImage(imageObj)
                 cropLast(imageObj)
-                // await setImageView({ imageView: true, imageClicked: imageObj, orderID: orderID });
             }
         })
     }
 
 
 
-    const onPressCamera = () => {
-        requestCameraPermission()
-        openCamera();
+    const onPressCamera = async () => {
+        openCamera()
 
     }
     const onPressGallery = () => {
@@ -138,18 +148,10 @@ const HomeScreen = (props) => {
 
     //  Crop the Data
 
-    const navigateFilter = (image) => {
-        navigation.navigate('FilterScreen', { value: image })
+    const navigateFilter = (uri) => {
+        navigation.navigate('FilterScreen', { value: uri })
     }
-
-
-
-
-    //Image card
-
-
-
-
+    let findLegnth = imageList?.length % 2 == 0
 
     return (
 
@@ -158,8 +160,11 @@ const HomeScreen = (props) => {
                 {
                     imageList?.length > 0 ?
                         <FlatList
-                            contentContainerStyle={{ alignSelf: 'center', width: '90%', alignItems: 'center', justifyContent: 'center' }}
                             numColumns={2}
+                            columnWrapperStyle={{
+                                flex: 1,
+                                justifyContent: "space-around"
+                            }}
                             showsVerticalScrollIndicator={false}
                             showsHorizontalScrollIndicator={false}
                             data={imageList}
@@ -169,20 +174,18 @@ const HomeScreen = (props) => {
                                 return (
                                     <View style={{
                                         width: '45%',
-                                        height: 200,
+                                        height: 150,
                                         margin: 10,
                                         padding: 5,
-                                        alignSelf: 'center',
-                                        alignItems: 'center',
                                         borderRadius: 15,
                                         backgroundColor: '#FFFFFF',
                                         borderWidth: 1,
-                                        overflow: 'hidden'
                                     }} key={value}>
                                         <Image
                                             style={{
                                                 width: '100%',
-                                                height: '70%', borderWidth: 1
+                                                height: '70%',
+                                                borderWidth: 1
                                             }}
                                             source={{ uri: value }}
                                         />
@@ -232,17 +235,5 @@ const styles = StyleSheet.create({
     },
 
 });
-const mapStateToProps = state => {
-    return {
-        capturedImageUri: state.ImageReduce.capturedImage
-    }
 
-};
-
-const mapDispatchToProps = dispatch => {
-
-    return {
-        setImage: (uri) => dispatch({ type: CAPTUREDIMAGE, payload: uri }),
-    }
-}
-export default connect(mapStateToProps, mapDispatchToProps)(HomeScreen);
+export default HomeScreen;

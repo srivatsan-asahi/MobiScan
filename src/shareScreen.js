@@ -24,13 +24,13 @@ import { BackArrowIcon, ImageSaved } from '../assets/icons';
 
 
 const ShareScreen = (props) => {
-    const { capturedImageUri, route, navigation } = props;
+    const { route, navigation } = props;
 
     // URI
-    let uri = route.params.uri.current
-    console.log(uri)
-    let pdfuri = uri.split('file://').pop().toString()
+    let uri = route.params.value.current
 
+    let pdfuri = uri?.split('file://').pop().toString()
+    console.log("uri====>", uri)
     // Device Width and Height
     const deviceWidth = Dimensions.get('window').width;
     const deviceHeight = Dimensions.get('window').height;
@@ -98,6 +98,8 @@ const ShareScreen = (props) => {
         });
     }, [navigation]);
 
+
+
     return (
         <View style={styles.container}>
             <View>
@@ -128,6 +130,19 @@ const ShareScreen = (props) => {
     );
 }
 
+const mapStateToProps = state => {
+    return {
+        capturedImageUri: state.ImageReduce.capturedImage
+    }
+
+};
+
+const mapDispatchToProps = dispatch => {
+
+    return {
+        setImage: (uri) => dispatch({ type: CAPTUREDIMAGE, payload: uri }),
+    }
+}
 export default ShareScreen;
 
 const styles = StyleSheet.create({
