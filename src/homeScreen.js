@@ -106,10 +106,6 @@ const HomeScreen = (props) => {
                 cropLast(imageObj)
             }
         })
-
-
-
-
     };
 
     const openImageGallery = () => {
@@ -170,9 +166,8 @@ const HomeScreen = (props) => {
                             data={imageList}
                             keyExtractor={item => item}
                             renderItem={(item) => {
-                                let value = 'file://' + RNFetchBlob.fs.dirs.DCIMDir + '/' + item.item
+                                let value = 'file://' + RNFetchBlob.fs.dirs.DCIMDir + '/' + item.item;
                                 return (
-
                                     <TouchableOpacity onPress={() => {
                                         navigation.navigate('ImageshareScreen', { currentUri: value })
                                     }} style={{
@@ -192,6 +187,7 @@ const HomeScreen = (props) => {
                                             }}
                                             source={{ uri: value }}
                                         />
+                                        <Text>{item.item}</Text>
                                     </TouchableOpacity>
                                 )
 
