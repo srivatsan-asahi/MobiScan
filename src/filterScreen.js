@@ -21,15 +21,32 @@ import filters from '../assets/filters';
 // Image Converting and Sharing  Packages
 import ImagePicker from 'react-native-image-crop-picker';
 import { BackArrowIcon, CloseIcon, SaveIcon, ShareIcon } from '../assets/icons';
-import CameraRoll from '@react-native-community/cameraroll'
+import CameraRoll from '@react-native-community/cameraroll';
+
+import {
+    AdenCompat,
+    _1977Compat,
+    Grayscale,
+    ColorMatrix,
+    concatColorMatrices,
+    invert,
+    contrast,
+    saturate,
+} from 'react-native-image-filter-kit';
+
 
 const FilterScreen = (props) => {
 
     const { route, navigation, setImage } = props;
     // URI 
     let uri = useRef(route.params.value.uri);
-    const [selectedFilterIndex, setIndex] = useState(0);
-    const [imageuri, seteditedImageUri] = useState(uri)
+    const [selectedFilterIndex, setIndex] = useState();
+    const [imageuri, seteditedImageUri] = useState(route.params.value.uri);
+    console.log(filters.FILTERS)
+
+    let filterNameArray = Object.keys(filters.FILTERS)
+    console.log(filterNameArray)
+    console.log(imageuri)
 
     // let pdfuri = uri.current.split('file://').pop().toString()
 
@@ -48,9 +65,7 @@ const FilterScreen = (props) => {
             height: 400,
             freeStyleCropEnabled: true
         }).then(async (image) => {
-            // image['uri'] = image['path'];
-            // await setImage({ current: image['path'] })
-            seteditedImageUri({ current: image['path'] }) //Local State
+            seteditedImageUri(image['path']) //Local State
         }).catch((e) => {
             if (e.code == 'E_PICKER_CANCELLED') {
                 navigation.navigate("Home")
@@ -58,27 +73,46 @@ const FilterScreen = (props) => {
                 console.log(e)
             }
         });
-
     };
 
+    const onSelectFilter = (value) => {
+        let obj = filters.FILTERS
+
+        let concatValue = obj[value]
+        setIndex(concatValue);
+    };
 
 
     // Filter List
 
-    const renderFilterComponent = ({ item, index }) => {
-        const FilterComponent = item.filterComponent;
-        const image = (
-            <Image
-                style={{ width: '100%', height: '100%' }}
-                source={{ uri: imageuri.current }}
-                resizeMode={'contain'}
-            />
-        );
-
+    const renderFilterComponent = ({ item }) => {
+        console.log(item)
+        let obj = filters.FILTERS
+        let value = obj[item]
+        const filterimage = <ColorMatrix
+            style={{
+                width: 60,
+                height: 60,
+                borderWidth: 1
+            }}
+            matrix={concatColorMatrices(value)}
+            onExtractImage={onExtractImage}
+            extractImageEnabled={true}
+            resizeMode={'contain'}
+            image={
+                <Image
+                    style={styles.image}
+                    source={{ uri: imageuri }}
+                    resizeMode={'contain'}
+                />
+            }
+        />
         return (
-            <TouchableOpacity style={{ justifyContent: 'space-evenly' }} onPress={() => onSelectFilter(index)}>
-                <FilterComponent image={image} />
-                <Text >{item.title}</Text>
+            <TouchableOpacity style={{ justifyContent: 'space-around', marginHorizontal: 10 }} onPress={() =>
+                onSelectFilter(item)
+            }>
+                <Text >{item}</Text>
+                {filterimage}
             </TouchableOpacity>
         );
     };
@@ -87,12 +121,6 @@ const FilterScreen = (props) => {
         uri.current = nativeEvent.uri
     };
 
-    const onSelectFilter = selectedIndex => {
-        setIndex(selectedIndex);
-    };
-
-    const SelectedFilterComponent = filters.FILTERS[selectedFilterIndex].filterComponent;
-
 
 
     //  Header save Option
@@ -100,7 +128,7 @@ const FilterScreen = (props) => {
         navigation.setOptions({
             headerRight: () => (
                 <Pressable style={{ justifyContent: 'center', alignItems: 'center' }} onPress={() => {
-                    let savedUri = imageuri?.current
+                    let savedUri = uri?.current
                     CameraRoll.saveToCameraRoll(savedUri)
                         .then(() => {
                             navigation.navigate('ShareScreen', { value: uri })
@@ -113,7 +141,7 @@ const FilterScreen = (props) => {
             ),
             headerLeft: () => (
                 <Pressable style={{ justifyContent: 'center', alignItems: 'center', marginRight: 20, marginTop: 2, alignSelf: 'center' }} onPress={() => {
-                    let savedUri = imageuri?.current
+                    let savedUri = uri?.current
                     cropLast(savedUri)
                 }}>
                     <BackArrowIcon />
@@ -122,53 +150,43 @@ const FilterScreen = (props) => {
         });
     }, [navigation]);
 
+
+
+
     return (
-
         <View style={styles.container}>
-            {selectedFilterIndex === 0 ? (
-                <Image
-                    style={styles.image}
-                    source={{ uri: imageuri.current }}
-                    resizeMode={'contain'}
-                />
-            ) : (
-                <SelectedFilterComponent
-                    onExtractImage={onExtractImage}
-                    extractImageEnabled={true}
-                    image={
-                        <Image
-                            style={styles.image}
-                            source={{ uri: imageuri.current }}
-                            resizeMode={'contain'}
-                        />
-                    }
-                />
-            )}
 
-            <FlatList
-                data={filters.FILTERS}
-                renderItem={renderFilterComponent}
-                keyExtractor={item => item.title}
-                horizontal={true}
+
+            <ColorMatrix
+                style={{
+                    width: '95%',
+                    height: '85%',
+                    marginTop: '2%',
+                    borderWidth: 1
+                }}
+                matrix={concatColorMatrices(selectedFilterIndex ? selectedFilterIndex : filters.FILTERS.Normal)}
+                onExtractImage={onExtractImage}
+                extractImageEnabled={true}
+                resizeMode={'contain'}
+                image={
+                    <Image
+                        style={styles.image}
+                        source={{ uri: imageuri }}
+                        resizeMode={'contain'}
+                    />
+                }
             />
 
+            <FlatList
+                data={filterNameArray}
+                renderItem={renderFilterComponent}
+                keyExtractor={item => item}
+                horizontal={true}
+            />
         </View>
     )
 };
 
-const mapStateToProps = state => {
-    console.log(state.ImageReduce.capturedImage, "<===Captuers")
-    return {
-        capturedImageUri: state.ImageReduce.capturedImage
-    }
-
-};
-const mapDispatchToProps = dispatch => {
-
-    return {
-        setImage: (uri) => dispatch({ type: CAPTUREDIMAGE, payload: uri }),
-    }
-}
 
 export default FilterScreen;
 
@@ -210,10 +228,9 @@ const styles = StyleSheet.create({
         textAlign: "center"
     },
     image: {
-        width: 520,
-        height: 520,
-        marginVertical: 10,
-        alignSelf: 'center',
+        width: '100%',
+        height: '100%',
+        borderWidth: 1,
     },
 
 });
