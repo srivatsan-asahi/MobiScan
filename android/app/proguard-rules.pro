@@ -9,5 +9,7 @@
 # react-native-image-filter-kit
 -keep class com.facebook.react.views.image.** { *; }
 -keep class com.facebook.drawee.** { *; }
+-keep class com.facebook.hermes.unicode.** { *; }
+-keep class com.facebook.jni.** { *; }
 
 # Add any project specific keep options here:

@@ -101,7 +101,7 @@ const FilterScreen = (props) => {
             resizeMode={'contain'}
             image={
                 <Image
-                    style={styles.image}
+                    style={{ width: '100%', height: '100%' }}
                     source={{ uri: imageuri }}
                     resizeMode={'contain'}
                 />
@@ -162,7 +162,7 @@ const FilterScreen = (props) => {
                     width: '95%',
                     height: '85%',
                     marginTop: '2%',
-                    borderWidth: 1
+
                 }}
                 matrix={concatColorMatrices(selectedFilterIndex ? selectedFilterIndex : filters.FILTERS.Normal)}
                 onExtractImage={onExtractImage}
@@ -229,8 +229,9 @@ const styles = StyleSheet.create({
     },
     image: {
         width: '100%',
-        height: '100%',
-        borderWidth: 1,
+        height: 520,
+        marginVertical: 10,
+        alignSelf: 'center',
     },
 
 });

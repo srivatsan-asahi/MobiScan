@@ -31,8 +31,6 @@ import ShareScreen from './src/shareScreen';
 import ImageshareScreen from './src/ImageshareScreen';
 
 
-
-
 const App = () => {
 
   const Stack = createNativeStackNavigator();
